@@ -155,8 +155,11 @@ export function createApp({ env = process.env, fetchImpl = fetch, hindsightClien
 
   app.use((error, _request, response, _next) => {
     const status = Number.isInteger(error.status) ? error.status : 502;
+    const isCreditError = typeof error.message === "string" && /insufficient credits/i.test(error.message);
     const message = error.type === "entity.too.large"
       ? "Request body is too large. Keep code submissions under 24,000 characters."
+      : isCreditError
+        ? "Hindsight has insufficient credits for this operation. Add credits or configure a funded/local Hindsight API."
       : status >= 500 && !error.status
         ? "The request could not be completed. Check service configuration and try again."
         : error.message;
